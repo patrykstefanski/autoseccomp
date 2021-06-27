@@ -1,0 +1,51 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -324,7 +324,7 @@ AC_CACHE_CHECK([for libevent directory], ac_cv_libevent_dir, [
+   le_found=no
+   for ledir in $trylibeventdir "" $prefix /usr/local ; do
+     LDFLAGS="$saved_LDFLAGS"
+-    LIBS="-levent $saved_LIBS"
++    LIBS="$ledir/lib/libevent.a $saved_LIBS"
+
+     # Skip the directory if it isn't there.
+     if test ! -z "$ledir" -a ! -d "$ledir" ; then
+@@ -372,7 +372,7 @@ AC_CACHE_CHECK([for libevent directory], ac_cv_libevent_dir, [
+ ])
+   fi
+ ])
+-LIBS="-levent $LIBS"
++LIBS="$ac_cv_libevent_dir/lib/libevent.a $LIBS"
+ if test $ac_cv_libevent_dir != "(system)"; then
+   if test -d "$ac_cv_libevent_dir/lib" ; then
+     LDFLAGS="-L$ac_cv_libevent_dir/lib $LDFLAGS"
+@@ -793,7 +793,7 @@ then
+ elif test "$GCC" = "yes"
+ then
+   GCC_VERSION=`$CC -dumpversion`
+-  CFLAGS="$CFLAGS -Wall -Werror -pedantic -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls"
++  CFLAGS="$CFLAGS -Wall -pedantic -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls"
+   if test "x$enable_asan" = "xyes"; then
+     CFLAGS="$CFLAGS -fsanitize=address"
+   fi
+--- a/memcached.c
++++ b/memcached.c
+@@ -4489,6 +4489,8 @@ static int _mc_meta_load_cb(const char *tag, void *ctx, void *data) {
+ }
+
+ int main (int argc, char **argv) {
++    __builtin_autoseccomp();
++
+     int c;
+     bool lock_memory = false;
+     bool do_daemonize = false;
+--- a/thread.c
++++ b/thread.c
+@@ -478,6 +478,8 @@ static void *worker_libevent(void *arg) {
+
+     register_thread_initialized();
+
++    __builtin_autoseccomp();
++
+     event_base_loop(me->base, 0);
+
+     // same mechanism used to watch for all threads exiting.

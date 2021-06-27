@@ -1,0 +1,53 @@
+#!/bin/bash
+
+set -Eeuo pipefail
+
+DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
+
+readonly LLVM_BUILD_DIR="$DIR/../llvm-build"
+readonly MUSL_BUILD_DIR="$DIR/../musl-build"
+
+declare -xr PATH="$LLVM_BUILD_DIR/bin:$PATH"
+
+readonly CC=clang
+readonly LIBC="$MUSL_BUILD_DIR"
+readonly LIBC_INC="$LIBC/include"
+readonly LIBC_LIB="$LIBC/lib"
+
+# prevent clang from running the linker (and erroring) on no input.
+sflags=
+eflags=
+for x; do
+    case "$x" in
+    -l*) input=1 ;;
+    *) input= ;;
+    esac
+    if test "$input"; then
+        sflags="-l-user-start"
+        eflags="-l-user-end"
+        break
+    fi
+done
+
+if [[ -v AUTOSECCOMP_ENABLE && "$AUTOSECCOMP_ENABLE" -eq "0" ]]; then
+  enable_flag=""
+else
+  enable_flag="-fautoseccomp"
+fi
+
+exec $CC \
+    -B"$DIR" \
+    -fuse-ld=autoseccomp-clang \
+    -flto \
+    $enable_flag \
+    -fPIC \
+    -static-libgcc \
+    -nostdinc \
+    --sysroot "$LIBC" \
+    -isystem "$LIBC_INC" \
+    -L-user-start \
+    $sflags \
+    "$@" \
+    $eflags \
+    -L"$LIBC_LIB" \
+    -L-user-end

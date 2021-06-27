@@ -1,0 +1,6 @@
+[submodule "llvm-project"]
+	path = llvm-project
+	url = https://github.com/patrykstefanski/autoseccomp-llvm-project.git
+[submodule "musl"]
+	path = musl
+	url = https://github.com/patrykstefanski/autoseccomp-musl.git

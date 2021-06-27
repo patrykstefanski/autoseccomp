@@ -1,0 +1,20 @@
+--- a/src/server.c
++++ b/src/server.c
+@@ -6150,6 +6150,8 @@ int main(int argc, char **argv) {
+     int j;
+     char config_from_stdin = 0;
+ 
++    __builtin_autoseccomp();
++
+ #ifdef REDIS_TEST
+     if (argc >= 3 && !strcasecmp(argv[1], "test")) {
+         int accurate = 0;
+@@ -6390,6 +6392,8 @@ int main(int argc, char **argv) {
+     redisSetCpuAffinity(server.server_cpulist);
+     setOOMScoreAdj(-1);
+ 
++    __builtin_autoseccomp();
++
+     aeMain(server.el);
+     aeDeleteEventLoop(server.el);
+     return 0;

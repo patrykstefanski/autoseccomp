@@ -1,0 +1,107 @@
+#!/usr/bin/env python3
+
+import os
+import subprocess
+import sys
+
+enable = True
+try:
+    if os.environ['AUTOSECCOMP_ENABLE'] == '0':
+        enable = False
+except KeyError:
+    pass
+
+pie = True
+try:
+    if os.environ['AUTOSECCOMP_PIE'] == '0':
+        pie = False
+except KeyError:
+    pass
+
+dump_graphs = False
+try:
+    if os.environ['AUTOSECCOMP_DUMP_GRAPHS'] == '1':
+        dump_graphs = True
+except KeyError:
+    pass
+
+user_link_dir = False
+user_link = False
+output_filename = ''
+params = [
+    'ld.lld',
+    '-static',
+    '--no-dynamic-linker',
+    '-nostdlib',
+]
+if pie:
+    params.append('-pie')
+i = 1
+while i < len(sys.argv):
+    arg = sys.argv[i]
+    if arg == '-L-user-start':
+        user_link_dir = True
+    elif arg == '-L-user-end':
+        user_link_dir = False
+    elif arg.startswith('-L'):
+        if user_link_dir:
+            params.append(arg)
+    elif arg.endswith('crt1.o'):
+        p = arg
+        if pie:
+            p = p.removesuffix('crt1.o') + 'rcrt1.o'
+        params.append(p)
+    elif arg.startswith('crtbegin') or arg.startswith('crtend'):
+        if arg == 'crtbegin.o':
+            name = 'crtbeginS.o'
+        elif arg == 'crtend.o':
+            params.append('-lc')
+            if enable:
+                params.append(os.path.dirname(os.path.realpath(
+                    __file__)) + '/../runtime-build/autoseccomp.o')
+            name = 'crtendS.o'
+        else:
+            name = arg
+        cmd = ['clang', '-print-file-name=' + name]
+        p = subprocess.run(cmd, stdout=subprocess.PIPE)
+        filename = p.stdout.decode('ascii').strip()
+        params.append(filename)
+    elif arg == '-lgcc' or arg == '-lgcc_eh':
+        filename = 'lib' + arg[2:] + '.a'
+        cmd = ['clang', '-print-file-name=' + filename]
+        p = subprocess.run(cmd, stdout=subprocess.PIPE)
+        filename = p.stdout.decode('ascii').strip()
+        params.append(filename)
+    elif arg.startswith('-l'):
+        if user_link:
+            params.append(arg)
+    elif arg.startswith('-sysroot=') or arg.startswith('--sysroot='):
+        pass
+    elif arg == '-dynamic-linker':
+        i += 1
+    elif arg == '-o':
+        if i + 1 < len(sys.argv):
+            output_filename = sys.argv[i + 1]
+        params.append(arg)
+    else:
+        params.append(arg)
+    i += 1
+params += [
+    '-plugin-opt=mcpu=x86-64',
+    # '-plugin-opt=O3',
+]
+if not enable:
+    params.append('-plugin-opt=-autoseccomp-disable')
+if dump_graphs and output_filename != '':
+    params += [
+        '-plugin-opt=-autoseccomp-call-graph=' + output_filename + '.CallGraph.dot',
+        '-plugin-opt=-autoseccomp-program-graph=' +
+        output_filename + '.ProgramGraph.dot',
+        '-plugin-opt=-autoseccomp-coalesced-program-graph=' +
+        output_filename + '.CoalescedProgramGraph.dot',
+        '-plugin-opt=-autoseccomp-propagated-program-graph=' +
+        output_filename + '.PropagatedProgramGraph.dot',
+    ]
+print('\n'.join(params))
+p = subprocess.run(params)
+sys.exit(p.returncode)

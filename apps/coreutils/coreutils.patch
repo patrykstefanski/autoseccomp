@@ -1,0 +1,165 @@
+--- a/src/cat.c
++++ b/src/cat.c
+@@ -502,6 +502,8 @@ cat (
+ int
+ main (int argc, char **argv)
+ {
++  __builtin_autoseccomp();
++
+   /* Optimal size of i/o operations of output.  */
+   size_t outsize;
+
+--- a/src/chmod.c
++++ b/src/chmod.c
+@@ -422,6 +422,8 @@ main (int argc, char **argv)
+   char const *reference_file = NULL;
+   int c;
+
++  __builtin_autoseccomp();
++
+   initialize_main (&argc, &argv);
+   set_program_name (argv[0]);
+   setlocale (LC_ALL, "");
+--- a/src/chown.c
++++ b/src/chown.c
+@@ -158,6 +158,8 @@
+ {
+   bool preserve_root = false;
+
++  __builtin_autoseccomp();
++
+   uid_t uid = -1;	/* Specified uid; -1 if not to be changed. */
+   gid_t gid = -1;	/* Specified gid; -1 if not to be changed. */
+
+--- a/src/cut.c
++++ b/src/cut.c
+@@ -484,6 +484,8 @@ main (int argc, char **argv)
+   bool delim_specified = false;
+   char *spec_list_string IF_LINT ( = NULL);
+
++  __builtin_autoseccomp();
++
+   initialize_main (&argc, &argv);
+   set_program_name (argv[0]);
+   setlocale (LC_ALL, "");
+--- a/src/dd.c
++++ b/src/dd.c
+@@ -2444,6 +2444,8 @@ main (int argc, char **argv)
+   int exit_status;
+   off_t offset;
+
++  __builtin_autoseccomp();
++
+   install_signal_handlers ();
+
+   initialize_main (&argc, &argv);
+--- a/src/head.c
++++ b/src/head.c
+@@ -922,6 +922,8 @@
+   int c;
+   size_t i;
+
++  __builtin_autoseccomp();
++
+   /* Number of items to print. */
+   uintmax_t n_units = DEFAULT_NUMBER;
+
+--- a/src/printf.c
++++ b/src/printf.c
+@@ -653,6 +653,8 @@ main (int argc, char **argv)
+   char *format;
+   int args_used;
+
++  __builtin_autoseccomp();
++
+   initialize_main (&argc, &argv);
+   set_program_name (argv[0]);
+   setlocale (LC_ALL, "");
+--- a/src/rm.c
++++ b/src/rm.c
+@@ -213,6 +213,8 @@ main (int argc, char **argv)
+   bool prompt_once = false;
+   int c;
+
++  __builtin_autoseccomp();
++
+   initialize_main (&argc, &argv);
+   set_program_name (argv[0]);
+   setlocale (LC_ALL, "");
+--- a/src/sleep.c
++++ b/src/sleep.c
+@@ -99,6 +99,8 @@ main (int argc, char **argv)
+   double seconds = 0.0;
+   bool ok = true;
+
++  __builtin_autoseccomp();
++
+   initialize_main (&argc, &argv);
+   set_program_name (argv[0]);
+   setlocale (LC_ALL, "");
+--- a/src/touch.c
++++ b/src/touch.c
+@@ -261,6 +261,8 @@ main (int argc, char **argv)
+   bool ok = true;
+   char const *flex_date = NULL;
+
++  __builtin_autoseccomp();
++
+   initialize_main (&argc, &argv);
+   set_program_name (argv[0]);
+   setlocale (LC_ALL, "");
+--- a/src/tr.c
++++ b/src/tr.c
+@@ -1697,6 +1697,8 @@ main (int argc, char **argv)
+   struct Spec_list *s1 = &buf1;
+   struct Spec_list *s2 = &buf2;
+
++  __builtin_autoseccomp();
++
+   initialize_main (&argc, &argv);
+   set_program_name (argv[0]);
+   setlocale (LC_ALL, "");
+--- a/src/true.c
++++ b/src/true.c
+@@ -54,6 +54,8 @@ Usage: %s [ignored command line arguments]\n\
+ int
+ main (int argc, char **argv)
+ {
++  __builtin_autoseccomp();
++
+   /* Recognize --help or --version only if it's the only command-line
+      argument.  */
+   if (argc == 2)
+--- a/src/uniq.c
++++ b/src/uniq.c
+@@ -484,6 +484,8 @@ main (int argc, char **argv)
+   char delimiter = '\n';	/* change with --zero-terminated, -z */
+   bool output_option_used = false;   /* if true, one of -u/-d/-D/-c was used */
+
++  __builtin_autoseccomp();
++
+   file[0] = file[1] = "-";
+   initialize_main (&argc, &argv);
+   set_program_name (argv[0]);
+--- a/src/wc.c
++++ b/src/wc.c
+@@ -687,6 +687,8 @@ main (int argc, char **argv)
+   struct fstatus *fstatus;
+   struct Tokens tok;
+
++  __builtin_autoseccomp();
++
+   initialize_main (&argc, &argv);
+   set_program_name (argv[0]);
+   setlocale (LC_ALL, "");
+--- a/src/yes.c
++++ b/src/yes.c
+@@ -58,6 +58,8 @@ Repeatedly output a line with all specified STRING(s), or 'y'.\n\
+ int
+ main (int argc, char **argv)
+ {
++  __builtin_autoseccomp();
++
+   initialize_main (&argc, &argv);
+   set_program_name (argv[0]);
+   setlocale (LC_ALL, "");
